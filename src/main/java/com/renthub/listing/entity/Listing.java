@@ -1,5 +1,5 @@
 package com.renthub.listing.entity;
-
+import java.util.List;
 import com.renthub.listing.model.ListingStatus;
 import com.renthub.listing.model.ListingType;
 import com.renthub.user.entity.User;
@@ -19,6 +19,16 @@ public class Listing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToMany(mappedBy = "listing",
+    cascade = CascadeType.ALL)
+
+    private List<ListingAttribute> attributes;
+
+    @OneToMany(mappedBy = "listing",
+    cascade = CascadeType.ALL)
+
+private List<ListingImage> images;
 
     // Owner of the listing
     @ManyToOne(fetch = FetchType.LAZY)

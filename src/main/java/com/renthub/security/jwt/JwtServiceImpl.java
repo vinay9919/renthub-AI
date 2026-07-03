@@ -38,7 +38,7 @@ public class JwtServiceImpl implements JwtService {
                 .subject(email)
                 .issuedAt(now)
                 .expiration(expiry)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey())
                 .compact();
     }
     @Override
@@ -64,7 +64,7 @@ public boolean isTokenExpired(String token) {
                 .subject(email)
                 .issuedAt(now)
                 .expiration(expiry)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey())
                 .compact();
     }
 

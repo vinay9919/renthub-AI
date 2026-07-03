@@ -1,5 +1,6 @@
 package com.renthub.exception;
 
+import com.renthub.booking.exception.BookingNotFoundException;
 import com.renthub.common.response.ErrorResponse;
 import com.renthub.common.response.ValidationErrorResponse;
 import com.renthub.listing.exception.ListingNotFoundException;
@@ -91,6 +92,20 @@ public ResponseEntity<ErrorResponse> handleAccessDenied(
     );
 
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(response);
+}
+@ExceptionHandler(BookingNotFoundException.class)
+public ResponseEntity<ErrorResponse> handleBookingNotFound(
+        BookingNotFoundException ex) {
+
+    ErrorResponse response = new ErrorResponse(
+            false,
+            ex.getMessage(),
+            HttpStatus.NOT_FOUND.value(),
+            LocalDateTime.now()
+    );
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(response);
 }
 }
