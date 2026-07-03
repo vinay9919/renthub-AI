@@ -28,4 +28,12 @@ public class AuthenticatedUserServiceImpl
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User not found"));
     }
+
+    @Override
+public Long getCurrentUserId() {
+
+    return getCurrentUser().getId();
+
+}
+
 }

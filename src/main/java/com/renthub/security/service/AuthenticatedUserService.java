@@ -6,4 +6,6 @@ public interface AuthenticatedUserService {
 
     User getCurrentUser();
 
+    Long getCurrentUserId();
+
 }

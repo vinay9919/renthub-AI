@@ -79,4 +79,18 @@ public ResponseEntity<ErrorResponse> handleListingNotFound(
             .body(response);
 }
     
+@ExceptionHandler(AccessDeniedException.class)
+public ResponseEntity<ErrorResponse> handleAccessDenied(
+        AccessDeniedException ex) {
+
+    ErrorResponse response = new ErrorResponse(
+            false,
+            ex.getMessage(),
+            HttpStatus.FORBIDDEN.value(),
+            LocalDateTime.now()
+    );
+
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(response);
+}
 }

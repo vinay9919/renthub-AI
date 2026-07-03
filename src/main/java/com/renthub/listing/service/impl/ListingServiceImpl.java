@@ -27,6 +27,7 @@ import com.renthub.listing.entity.ListingImage;
 import com.renthub.listing.repository.ListingImageRepository;
 import org.springframework.web.multipart.MultipartFile;
 import com.renthub.security.service.AuthenticatedUserService;
+import com.renthub.exception.AccessDeniedException;
 
 import java.util.List;
 
@@ -107,11 +108,11 @@ public Page<ListingResponse> getAllListings(
    @Override
 @Transactional
 public ListingResponse updateListing(Long id, UpdateListingRequest request) {
-
     Listing listing = listingRepository.findById(id)
             .orElseThrow(() ->
                     new ListingNotFoundException("Listing not found"));
 
+    validateListingOwner(listing);
     Category category = categoryRepository.findById(request.getCategoryId())
             .orElseThrow(() ->
                     new CategoryNotFoundException("Category not found"));
@@ -129,6 +130,7 @@ public ListingResponse updateListing(Long id, UpdateListingRequest request) {
     return ListingMapper.toResponse(updatedListing);
 }
 
+
     @Override
 @Transactional
 public void deleteListing(Long id) {
@@ -137,6 +139,7 @@ public void deleteListing(Long id) {
             .orElseThrow(() ->
                     new ListingNotFoundException("Listing not found"));
 
+        validateListingOwner(listing);
     listing.setStatus(com.renthub.listing.model.ListingStatus.INACTIVE);
     listing.setUpdatedAt(java.time.LocalDateTime.now());
 
@@ -147,11 +150,11 @@ public void deleteListing(Long id) {
 public List<ListingImageResponse> uploadImages(
         Long listingId,
         MultipartFile[] files) {
-
     Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() ->
                     new ListingNotFoundException("Listing not found"));
 
+    validateListingOwner(listing);
     List<ListingImageResponse> responses = new java.util.ArrayList<>();
 
     int order = listingImageRepository.findByListingId(listingId).size();
@@ -225,5 +228,15 @@ public List<ListingResponse> searchListings(
     return listings.stream()
             .map(ListingMapper::toResponse)
             .toList();
+}
+
+private void validateListingOwner(Listing listing) {
+
+    Long currentUserId = authenticatedUserService.getCurrentUserId();
+
+    if (!listing.getOwner().getId().equals(currentUserId)) {
+        throw new AccessDeniedException(
+                "You are not allowed to modify this listing");
+    }
 }
 }
