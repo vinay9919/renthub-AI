@@ -2,9 +2,11 @@ package com.renthub.user.model;
 
 public enum UserStatus {
 
+    PENDING,
+
     ACTIVE,
 
-    PENDING,
+    INACTIVE,
 
     BLOCKED,
 
