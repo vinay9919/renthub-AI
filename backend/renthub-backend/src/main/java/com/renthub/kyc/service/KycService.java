@@ -9,4 +9,10 @@ public interface KycService {
 
     KycResponse getCurrentUserKyc();
 
+    List<KycResponse> getPendingKycs();
+
+KycResponse approve(Long id);
+
+KycResponse reject(Long id, String reason);
+
 }

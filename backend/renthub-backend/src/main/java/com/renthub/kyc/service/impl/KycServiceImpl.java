@@ -12,6 +12,9 @@ import com.renthub.kyc.service.KycService;
 import com.renthub.security.service.AuthenticatedUserService;
 import com.renthub.user.entity.User;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,4 +100,46 @@ public class KycServiceImpl implements KycService {
         return KycMapper.toResponse(kyc);
     }
 
+    @Override
+@Transactional(readOnly = true)
+public List<KycResponse> getPendingKycs() {
+
+    return kycRepository.findByStatus(KycStatus.UNDER_REVIEW)
+            .stream()
+            .map(KycMapper::toResponse)
+            .toList();
+}
+@Override
+public KycResponse approve(Long id) {
+
+    Kyc kyc = kycRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("KYC not found"));
+
+    kyc.setStatus(KycStatus.VERIFIED);
+
+    kyc.setVerifiedAt(LocalDateTime.now());
+
+    kycRepository.save(kyc);
+
+    return KycMapper.toResponse(kyc);
+}
+@Override
+public KycResponse reject(Long id, String reason) {
+
+    Kyc kyc = kycRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("KYC not found"));
+
+    kyc.setStatus(KycStatus.REJECTED);
+
+    kyc.setRejectionReason(reason);
+
+    kyc.setResubmissionCount(
+            kyc.getResubmissionCount() + 1);
+
+    kycRepository.save(kyc);
+
+    return KycMapper.toResponse(kyc);
+}
 }
