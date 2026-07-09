@@ -40,4 +40,29 @@ public class Payment {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime updatedAt = LocalDateTime.now();
+    @Column(unique = true)
+private String transactionId;
+
+private String paymentMethod;
+
+private String gateway = "RAZORPAY";
+
+private String failureReason;
+
+private String refundId;
+
+private String refundStatus;
+
+@Column(columnDefinition = "TEXT")
+private String webhookPayload;
+
+private BigDecimal gatewayFee;
+
+private BigDecimal platformCommission;
+
+private BigDecimal ownerAmount;
+
+private LocalDateTime paidAt;
+
+private LocalDateTime refundedAt;
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,32 +29,93 @@ public class PaymentServiceImpl implements PaymentService {
     private final RazorpayClient razorpayClient;
 
     @Override
-    @Transactional
-    public PaymentResponse createOrder(CreatePaymentRequest request) throws Exception {
+@Transactional
+public PaymentResponse createOrder(CreatePaymentRequest request) throws Exception {
 
-        Booking booking = bookingRepository.findById(request.getBookingId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Booking not found"));
+    Booking booking = bookingRepository.findById(request.getBookingId())
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Booking not found"));
 
-        BigDecimal amount = booking.getListing().getPrice();
+    // Prevent duplicate payment
+    if (paymentRepository.findByBookingId(booking.getId()).isPresent()) {
+        throw new IllegalArgumentException(
+                "Payment already exists for this booking");
+    }
 
-        JSONObject options = new JSONObject();
-        options.put("amount", amount.multiply(BigDecimal.valueOf(100)));
-        options.put("currency", "INR");
-        options.put("receipt", "booking_" + booking.getId());
+    // Prevent owner renting own listing
+    if (booking.getCustomer().getId()
+            .equals(booking.getListing().getOwner().getId())) {
 
-        Order order = razorpayClient.orders.create(options);
+        throw new IllegalArgumentException(
+                "You cannot rent your own listing");
+    }
 
-        System.out.println(order.toString());
+    // Booking must be pending
+    if (booking.getStatus() != com.renthub.booking.model.BookingStatus.PENDING) {
 
-        Payment payment = new Payment();
-        payment.setBooking(booking);
-        payment.setAmount(amount);
-        payment.setStatus(PaymentStatus.CREATED);
-        payment.setRazorpayOrderId(order.get("id"));
+        throw new IllegalArgumentException(
+                "Only pending bookings can be paid");
+    }
 
-        Payment saved = paymentRepository.save(payment);
+    BigDecimal amount = booking.getListing().getPrice();
 
-        return PaymentMapper.toResponse(saved);
+    if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+        throw new IllegalArgumentException(
+                "Invalid booking amount");
+    }
+
+    JSONObject options = new JSONObject();
+
+    options.put("amount",
+            amount.multiply(BigDecimal.valueOf(100)));
+
+    options.put("currency", "INR");
+
+    options.put("receipt",
+            "booking_" + booking.getId());
+
+    Order order = razorpayClient.orders.create(options);
+
+    Payment payment = new Payment();
+
+    payment.setBooking(booking);
+
+    payment.setAmount(amount);
+
+    payment.setStatus(PaymentStatus.CREATED);
+
+    payment.setGateway("RAZORPAY");
+
+    payment.setTransactionId(
+            java.util.UUID.randomUUID().toString());
+
+    payment.setRazorpayOrderId(
+            order.get("id").toString());
+
+    Payment saved = paymentRepository.save(payment);
+
+    return PaymentMapper.toResponse(saved);
+}
+
+    @Override
+    public PaymentResponse verifyPayment(String razorpayOrderId,
+                                         String razorpayPaymentId,
+                                         String razorpaySignature) {
+        throw new UnsupportedOperationException("Will implement in Sprint 18 - Step 2");
+    }
+
+    @Override
+    public List<PaymentResponse> getMyPayments() {
+        throw new UnsupportedOperationException("Will implement in Sprint 18 - Step 3");
+    }
+
+    @Override
+    public PaymentResponse refund(Long paymentId) {
+        throw new UnsupportedOperationException("Will implement in Sprint 18 - Step 4");
+    }
+
+    @Override
+    public void processWebhook(String payload) {
+        throw new UnsupportedOperationException("Will implement in Sprint 18 - Step 5");
     }
 }

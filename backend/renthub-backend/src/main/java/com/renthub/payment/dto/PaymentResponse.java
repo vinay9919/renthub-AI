@@ -21,5 +21,13 @@ public class PaymentResponse {
     private String razorpayOrderId;
 
     private String razorpayPaymentId;
+    
+    private String transactionId;
+
+    private String paymentMethod;
+
+    private String gateway;
+
+    private String refundStatus;
 
 }

@@ -17,6 +17,10 @@ public class PaymentMapper {
                 .status(payment.getStatus())
                 .razorpayOrderId(payment.getRazorpayOrderId())
                 .razorpayPaymentId(payment.getRazorpayPaymentId())
+                .transactionId(payment.getTransactionId())
+                .paymentMethod(payment.getPaymentMethod())
+                .gateway(payment.getGateway())
+                .refundStatus(payment.getRefundStatus())
                 .build();
     }
 }
