@@ -18,4 +18,6 @@ public interface BookingService {
     BookingResponse rejectBooking(Long bookingId);
 
     BookingResponse cancelBooking(Long bookingId);
+    
+    BookingResponse completeBooking(Long bookingId);
 }

@@ -173,4 +173,31 @@ bookingRepository.save(booking);
 
 return BookingMapper.toResponse(booking);
 }
+@Override
+@Transactional
+public BookingResponse completeBooking(Long bookingId) {
+
+    System.out.println(">>> completeBooking called");
+
+    Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() ->
+                    new BookingNotFoundException("Booking not found"));
+
+    Long ownerId = authenticatedUserService.getCurrentUserId();
+
+    System.out.println("Logged-in user: " + ownerId);
+    System.out.println("Listing owner: " + booking.getListing().getOwner().getId());
+    System.out.println("Booking status: " + booking.getStatus());
+
+    if (!booking.getListing().getOwner().getId().equals(ownerId)) {
+        throw new AccessDeniedException(
+                "You are not allowed to complete this booking");
+    }
+
+    booking.setStatus(BookingStatus.COMPLETED);
+
+    bookingRepository.save(booking);
+
+    return BookingMapper.toResponse(booking);
+}
 }

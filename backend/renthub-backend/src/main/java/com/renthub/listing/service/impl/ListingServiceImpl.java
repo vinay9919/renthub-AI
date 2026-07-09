@@ -63,6 +63,10 @@ public class ListingServiceImpl implements ListingService {
         listing.setCity(request.getCity());
         listing.setArea(request.getArea());
 
+        listing.setStatus(
+        com.renthub.listing.model.ListingStatus.ACTIVE);
+        listing.setArea(request.getArea());
+
         Listing savedListing = listingRepository.save(listing);
 
         return ListingMapper.toResponse(savedListing);
