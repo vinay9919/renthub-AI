@@ -18,4 +18,6 @@ public interface KycRepository extends JpaRepository<Kyc, Long> {
 
     List<Kyc> findByStatus(KycStatus status);
 
+    long countByStatus(KycStatus status);
+
 }
