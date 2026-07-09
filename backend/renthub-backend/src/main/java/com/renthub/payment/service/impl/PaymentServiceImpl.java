@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.renthub.payment.dto.PaymentVerificationRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -97,12 +98,44 @@ public PaymentResponse createOrder(CreatePaymentRequest request) throws Exceptio
     return PaymentMapper.toResponse(saved);
 }
 
-    @Override
-    public PaymentResponse verifyPayment(String razorpayOrderId,
-                                         String razorpayPaymentId,
-                                         String razorpaySignature) {
-        throw new UnsupportedOperationException("Will implement in Sprint 18 - Step 2");
+@Override
+@Transactional
+public PaymentResponse verifyPayment(
+        PaymentVerificationRequest request) {
+
+    if (request.getRazorpayOrderId() == null ||
+        request.getRazorpayPaymentId() == null ||
+        request.getRazorpaySignature() == null) {
+
+        throw new IllegalArgumentException(
+                "Invalid payment verification request");
     }
+
+    Payment payment = paymentRepository
+            .findByRazorpayOrderId(request.getRazorpayOrderId())
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Payment not found"));
+
+    if (payment.getStatus() == PaymentStatus.SUCCESS) {
+        throw new IllegalArgumentException(
+                "Payment is already verified");
+    }
+
+    payment.setRazorpayPaymentId(request.getRazorpayPaymentId());
+    payment.setRazorpaySignature(request.getRazorpaySignature());
+    payment.setStatus(PaymentStatus.SUCCESS);
+    payment.setPaidAt(java.time.LocalDateTime.now());
+    payment.setUpdatedAt(java.time.LocalDateTime.now());
+
+    Booking booking = payment.getBooking();
+    booking.setStatus(
+            com.renthub.booking.model.BookingStatus.APPROVED);
+
+    bookingRepository.save(booking);
+    paymentRepository.save(payment);
+
+    return PaymentMapper.toResponse(payment);
+}
 
     @Override
     public List<PaymentResponse> getMyPayments() {
