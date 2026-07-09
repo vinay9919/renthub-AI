@@ -1,5 +1,6 @@
 package com.renthub.wishlist.controller;
 
+import com.renthub.security.service.AuthenticatedUserService;
 import com.renthub.wishlist.dto.WishlistResponse;
 import com.renthub.wishlist.service.WishlistService;
 import lombok.RequiredArgsConstructor;
@@ -13,15 +14,18 @@ import java.util.List;
 public class WishlistController {
 
     private final WishlistService wishlistService;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    @PostMapping("/{userId}/{listingId}")
-    public WishlistResponse add(
-            @PathVariable Long userId,
-            @PathVariable Long listingId) {
+    @PostMapping("/{listingId}")
+public WishlistResponse add(
+        @PathVariable Long listingId) {
 
-        return wishlistService.add(userId, listingId);
-    }
+    Long userId = authenticatedUserService
+            .getCurrentUser()
+            .getId();
 
+    return wishlistService.add(userId, listingId);
+}
     @DeleteMapping("/{userId}/{listingId}")
     public void remove(
             @PathVariable Long userId,

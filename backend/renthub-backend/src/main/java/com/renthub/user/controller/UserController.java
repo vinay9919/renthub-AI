@@ -8,10 +8,12 @@ import com.renthub.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.renthub.user.dto.ChangePasswordRequest;
-
+import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
@@ -22,19 +24,21 @@ public class UserController {
     private final UserService userService;
     private final AuthenticatedUserService authenticatedUserService;
 
-    @GetMapping
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers();
-    }
+    @PreAuthorize("hasRole('ADMIN')")
+@GetMapping
+public List<UserResponse> getAllUsers() {
+    return userService.getAllUsers();
+}
 
-    @GetMapping("/{id}")
-    public UserProfileResponse getUserById(
-            @PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+@GetMapping("/{id}")
+public UserProfileResponse getUserById(
+        @PathVariable Long id) {
 
-        return userService.getUserById(id);
-    }
+    return userService.getUserById(id);
+}
 
-    @GetMapping("/profile")
+    @GetMapping("/me")
     public UserProfileResponse getCurrentProfile() {
 
         Long userId = authenticatedUserService.getCurrentUserId();
@@ -42,7 +46,7 @@ public class UserController {
         return userService.getUserById(userId);
     }
 
-    @PutMapping("/profile")
+    @PutMapping("/me")
     public UserProfileResponse updateProfile(
             @Valid @RequestBody UpdateProfileRequest request) {
 
@@ -52,7 +56,7 @@ public class UserController {
     }
 
     @PostMapping(
-            value = "/profile/image",
+            value = "/me/image",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UserProfileResponse uploadProfileImage(
             @RequestParam("file") MultipartFile file) {
@@ -62,6 +66,7 @@ public class UserController {
         return userService.uploadProfileImage(userId, file);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/deactivate")
     public String deactivateAccount() {
 
@@ -72,6 +77,7 @@ public class UserController {
         return "Account deactivated successfully";
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping
     public String deleteAccount() {
 
@@ -81,9 +87,11 @@ public class UserController {
 
         return "Account deleted successfully";
     }
-
+    
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/change-password")
-public String changePassword(
+    @ResponseStatus(HttpStatus.OK)
+    public String changePassword(
         @Valid
         @RequestBody
         ChangePasswordRequest request) {
