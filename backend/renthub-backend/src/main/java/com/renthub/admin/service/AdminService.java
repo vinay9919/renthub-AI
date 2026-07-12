@@ -1,5 +1,6 @@
 package com.renthub.admin.service;
 
+import com.renthub.admin.dto.AdminPaymentResponse;
 import com.renthub.admin.dto.AdminUserResponse;
 import com.renthub.admin.dto.DashboardResponse;
 import com.renthub.listing.dto.ListingResponse;
@@ -29,4 +30,6 @@ public interface AdminService {
     void deleteListing(Long listingId);
 
     List<BookingResponse> getAllBookings();
+    
+    List<AdminPaymentResponse> getAllPayments();
 }

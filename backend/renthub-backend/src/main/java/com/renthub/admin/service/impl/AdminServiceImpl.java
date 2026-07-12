@@ -22,6 +22,7 @@ import com.renthub.user.entity.User;
 import com.renthub.user.model.UserStatus;
 import com.renthub.booking.dto.BookingResponse;
 import com.renthub.booking.mapper.BookingMapper;
+import com.renthub.admin.dto.AdminPaymentResponse;
 
 import java.util.List;
 
@@ -178,6 +179,40 @@ public List<BookingResponse> getAllBookings() {
     return bookingRepository.findAll()
             .stream()
             .map(BookingMapper::toResponse)
+            .toList();
+}
+@Override
+public List<AdminPaymentResponse> getAllPayments() {
+
+    return paymentRepository.findAllWithBookingAndCustomer()
+            .stream()
+            .map(payment -> {
+
+                System.out.println("Payment ID: " + payment.getId());
+
+                System.out.println("Booking ID");
+                Long bookingId = payment.getBooking().getId();
+
+                System.out.println("Customer Name");
+                String customer = payment.getBooking().getCustomer().getFullName();
+
+                System.out.println("Amount");
+                var amount = payment.getAmount();
+
+                System.out.println("Building DTO");
+
+                return AdminPaymentResponse.builder()
+                        .id(payment.getId())
+                        .bookingId(bookingId)
+                        .customerName(customer)
+                        .amount(amount)
+                        .status(payment.getStatus())
+                        .gateway(payment.getGateway())
+                        .transactionId(payment.getTransactionId())
+                        .razorpayOrderId(payment.getRazorpayOrderId())
+                        .createdAt(payment.getCreatedAt())
+                        .build();
+            })
             .toList();
 }
 }

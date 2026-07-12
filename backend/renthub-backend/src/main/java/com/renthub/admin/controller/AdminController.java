@@ -3,6 +3,7 @@ package com.renthub.admin.controller;
 import com.renthub.admin.dto.DashboardResponse;
 import com.renthub.admin.service.AdminService;
 import com.renthub.listing.dto.ListingResponse;
+import com.renthub.admin.dto.AdminPaymentResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -94,5 +95,14 @@ public void deleteListing(@PathVariable Long id) {
 @GetMapping("/bookings")
 public String getAllBookings() {
     return "Booking API Working";
+}
+// ===========================
+// Payment Management
+// ===========================
+
+@PreAuthorize("hasRole('ADMIN')")
+@GetMapping("/payments-all")
+public List<AdminPaymentResponse> getAllPayments() {
+    return adminService.getAllPayments();
 }
 }
