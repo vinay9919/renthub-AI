@@ -108,4 +108,16 @@ public ResponseEntity<ErrorResponse> handleBookingNotFound(
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(response);
 }
+@ExceptionHandler(IllegalArgumentException.class)
+public ResponseEntity<ErrorResponse> handleIllegalArgument(
+        IllegalArgumentException ex) {
+
+    return ResponseEntity.badRequest().body(
+            ErrorResponse.builder()
+                    .success(false)
+                    .message(ex.getMessage())
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .build()
+    );
+}
 }

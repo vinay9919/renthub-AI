@@ -1,6 +1,7 @@
 package com.renthub.payment.service.impl;
 
 import com.renthub.booking.entity.Booking;
+import com.renthub.booking.model.BookingStatus;
 import com.renthub.booking.repository.BookingRepository;
 import com.renthub.exception.ResourceNotFoundException;
 import com.renthub.payment.dto.CreatePaymentRequest;
@@ -52,11 +53,10 @@ public PaymentResponse createOrder(CreatePaymentRequest request) throws Exceptio
     }
 
     // Booking must be pending
-    if (booking.getStatus() != com.renthub.booking.model.BookingStatus.PENDING) {
-
-        throw new IllegalArgumentException(
-                "Only pending bookings can be paid");
-    }
+    if (booking.getStatus() != BookingStatus.APPROVED) {
+    throw new IllegalArgumentException(
+            "Only approved bookings can be paid");
+}
 
     BigDecimal amount = booking.getListing().getPrice();
 
