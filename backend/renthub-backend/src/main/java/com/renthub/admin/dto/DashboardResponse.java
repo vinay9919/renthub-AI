@@ -17,6 +17,8 @@ public class DashboardResponse {
 
     private long totalReviews;
 
-    private long pendingKyc;
+    private long totalCategories;
+
+    private double totalRevenue;
 
 }
