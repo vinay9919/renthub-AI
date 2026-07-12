@@ -4,6 +4,8 @@ import com.renthub.security.service.AuthenticatedUserService;
 import com.renthub.wishlist.dto.WishlistResponse;
 import com.renthub.wishlist.service.WishlistService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,9 +17,9 @@ public class WishlistController {
 
     private final WishlistService wishlistService;
     private final AuthenticatedUserService authenticatedUserService;
-
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{listingId}")
-public WishlistResponse add(
+    public WishlistResponse add(
         @PathVariable Long listingId) {
 
     Long userId = authenticatedUserService
@@ -26,29 +28,33 @@ public WishlistResponse add(
 
     return wishlistService.add(userId, listingId);
 }
-    @DeleteMapping("/{userId}/{listingId}")
-    public void remove(
-            @PathVariable Long userId,
-            @PathVariable Long listingId) {
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{listingId}")
+public void remove(
+        @PathVariable Long listingId) {
 
-        wishlistService.remove(userId, listingId);
-    }
+    Long userId = authenticatedUserService.getCurrentUserId();
 
-    @GetMapping("/{userId}")
-    public List<WishlistResponse> getUserWishlist(
-            @PathVariable Long userId) {
+    wishlistService.remove(userId, listingId);
+}
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping
+public List<WishlistResponse> getUserWishlist() {
 
-        return wishlistService.getUserWishlist(userId);
-    }
+    Long userId = authenticatedUserService.getCurrentUserId();
 
-    @GetMapping("/{userId}/{listingId}/exists")
-    public boolean exists(
-            @PathVariable Long userId,
-            @PathVariable Long listingId) {
+    return wishlistService.getUserWishlist(userId);
+}
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{listingId}/exists")
+public boolean exists(
+        @PathVariable Long listingId) {
 
-        return wishlistService.exists(userId, listingId);
-    }
+    Long userId = authenticatedUserService.getCurrentUserId();
 
+    return wishlistService.exists(userId, listingId);
+}
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/count/{listingId}")
     public long count(
             @PathVariable Long listingId) {
